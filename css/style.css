@@ -1,0 +1,58 @@
+/*
+PALETTE 
+#665A3B - Light shade
+#997B2B - Light accent
+#322A22 - main color
+#3B6659 - Dark accent
+#1B403F - Dark shade
+*/
+body {
+    background-color: #181411;
+    font-family: 'Courier New', Courier, monospace;
+}
+#links {
+    border-style: solid;
+    border-width: 2px;
+    border-color: #a8882f;
+    box-sizing: border-box;
+    margin: 20px;
+    padding: 0px 15px;
+    float:left;
+    width: max-content;
+}
+.category {
+    float: left;
+    width: auto;
+    padding: 20px;
+    /* border: 1px solid red; */
+}
+.category h3 {
+    border-bottom: 1px dashed #a8882f;
+    color: #a8882f;    
+}
+.category ul {
+    padding-inline-start: 0px;
+}
+.category li {
+    list-style:none;
+    /* padding-inline-start: 0px; */
+}
+
+
+#links h2{
+    color: #a8882f;
+}
+
+#links li.category-header {
+    font-size: 18px;
+    color: #a8882f;
+    display: inline;
+    position: relative;
+    list-style-type: none;
+}
+.category-link {
+    color: #BE821A7F;
+}
+.category-link:hover {
+    color: #BE821A;
+}
