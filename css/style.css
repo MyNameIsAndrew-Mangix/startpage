@@ -1,6 +1,6 @@
 /*
 PALETTE 
-#665A3B - Light shade
+#e0c580 - Light shade
 #997B2B - Light accent
 #322A22 - main color
 #3B6659 - Dark accent
@@ -13,7 +13,7 @@ body {
 #links {
     border-style: solid;
     border-width: 2px;
-    border-color: #a8882f;
+    border-color: #997B2B;
     box-sizing: border-box;
     margin: 20px;
     padding: 0px 15px;
@@ -27,8 +27,8 @@ body {
     /* border: 1px solid red; */
 }
 .category h3 {
-    border-bottom: 1px dashed #a8882f;
-    color: #a8882f;    
+    border-bottom: 1px dashed #997B2B;
+    color: #997B2B;    
 }
 .category ul {
     padding-inline-start: 0px;
@@ -38,21 +38,20 @@ body {
     /* padding-inline-start: 0px; */
 }
 
-
-#links h2{
-    color: #a8882f;
-}
-
-#links li.category-header {
+#links li.categoryHeader {
     font-size: 18px;
-    color: #a8882f;
+    color: #997B2B;
     display: inline;
     position: relative;
     list-style-type: none;
 }
-.category-link {
+.categoryLink {
     color: #BE821A7F;
 }
 .category-link:hover {
     color: #BE821A;
+}
+
+#time {
+    color: #e0c580;
 }
