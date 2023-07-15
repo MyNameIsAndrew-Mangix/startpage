@@ -2,14 +2,31 @@
   "name": "start-page",
   "version": "1.0.0",
   "description": "Step 1: Finish the start page's HTML/CSS tags/rules.     Step 2: Add javscript for opening links.     Step 2.5: Add clock functionality?     Step 3: Make the workspace links customizable through the start page using local storage with download to backup in case of accidental cache/cookie deletion.     Step 3.1: Try to integrate customization with a built-in terminal      enabled by button.     Step 4: Make custom news feed section.     Step 5: Make news feed customizable.     Step 6: Make theme customizable.     Step 7: Maintain.",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
+    "start": "nodemon src/server.ts",
+    "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.44.0",
+    "eslint-plugin-react": "^7.32.2",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongodb": "^5.7.0",
+    "mongoose": "^7.3.4",
+    "bcrypt": "^5.1.0",
+    "envalid": "^7.3.1"
   }
 }
