@@ -1,10 +1,13 @@
 import "dotenv/config";
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
+import { errorHandler} from "../middleware/errorHandler"
 import workspaceRoutes from "./routes/category";
+import testRouter from "./routes/testRoutes";
 
 const app = express();
 
 app.use(express.json());
+app.use("/", testRouter)
 app.use("/api/workspaces", workspaceRoutes);
 
 app.use((req, res, next) => {
@@ -12,11 +15,6 @@ app.use((req, res, next) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
-    console.error(error);
-    let errorMessage = "An unknown error occured";
-    if (error instanceof Error) errorMessage = error.message;
-    res.status(500).json({ error: errorMessage });
-})
+app.use(errorHandler);
 
 export default app;
