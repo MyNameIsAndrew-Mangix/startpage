@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Homely",
+  "version": "1.0",
+
+  "description": "A browser organizer for people that are bad at using bookmarks",
+
+  "icons": {
+    "48": "icons/homely-48.png"
+  },
+  
+  "action": {
+    "default_popup": "popup.html"
+  },
+
+  "permissions": [
+    "tabs"
+  ]
+}

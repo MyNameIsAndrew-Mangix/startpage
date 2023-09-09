@@ -2,16 +2,38 @@ import "dotenv/config";
 import express from "express";
 import { errorHandler} from "../middleware/errorHandler"
 import workspaceRoutes from "./routes/category";
+import userRoutes from "./routes/user";
 import testRouter from "./routes/testRoutes";
+import createHttpError from "http-errors";
+import cors from "cors";
+import session from "express-session";
+import env from "./util/validateEnv";
+import MongoStore from "connect-mongo";
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
+
+app.use(session({
+    secret: env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 60 * 60 * 1000,
+    },
+    rolling: true,
+    store: MongoStore.create({
+        mongoUrl: env.MONGO_CONNECTION_STRING
+    }),
+}));
+
 app.use("/", testRouter)
-app.use("/api/workspaces", workspaceRoutes);
+app.use("/api/category", workspaceRoutes);
+app.use("/api/users", userRoutes);
 
 app.use((req, res, next) => {
-    next(Error("Endpoint not found"));
+    next(createHttpError(404, "Endpoint not found"));
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
