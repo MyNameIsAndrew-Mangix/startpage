@@ -1,6 +1,7 @@
-# My Awesome Project
+# Homely
 I don't like using bookmarks, and I haven't look into optimizing them if it's possible. This app works with an extension and an API to get, store, and open groups of tabs at a time. Let's be honest, most people have windows filled with tabs they don't want to close.
 **Link to project:** coming soon (looking for hosting service)
+![Screenshot_2023-09-12_14-36-55](https://github.com/MyNameIsAndrew-Mangix/startpage/assets/67389882/6430d251-4c35-498b-a737-ad8ce5e297ab)
 
 
 ## How It's Made:
