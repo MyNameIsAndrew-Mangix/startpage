@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import { errorHandler} from "../middleware/errorHandler"
+import { errorHandler } from "../middleware/errorHandler"
 import workspaceRoutes from "./routes/category";
 import userRoutes from "./routes/user";
 import testRouter from "./routes/testRoutes";
@@ -9,6 +9,7 @@ import cors from "cors";
 import session from "express-session";
 import env from "./util/validateEnv";
 import MongoStore from "connect-mongo";
+import { requiresAuth } from "../middleware/auth";
 
 const app = express();
 app.use(cors());
@@ -29,8 +30,8 @@ app.use(session({
 }));
 
 app.use("/", testRouter)
-app.use("/api/category", workspaceRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/category", requiresAuth, workspaceRoutes);
 
 app.use((req, res, next) => {
     next(createHttpError(404, "Endpoint not found"));

@@ -1,4 +1,4 @@
-import { model, Schema, Document, Types} from "mongoose";
+import { model, Schema, Document, Types } from "mongoose";
 
 interface ISite {
     title?: string;
@@ -8,29 +8,33 @@ interface ISite {
 interface IWorkspace {
     title: string;
     sites?: ISite[];
+    parentCategoryId: string;
 }
 
 interface ICategory {
     title: string;
     workspaces?: IWorkspace[];
+    userId: Types.ObjectId;
 }
 
 const siteSchema = new Schema<ISite>({
-    title: { type: String},
-    url: { type: String, required: true}
+    title: { type: String },
+    url: { type: String, required: true }
 })
 
 const workspaceSchema = new Schema<IWorkspace>({
-    title: { type: String, required: true},
+    title: { type: String, required: true },
     sites: [{ type: siteSchema }],
-}) 
-
-const categorySchema = new Schema<ICategory>({
-    title: { type: String, required: true, unique: true},
-    workspaces:[{ type: workspaceSchema  }],
+    parentCategoryId: { type: String, required: true }
 })
 
-export interface ISiteModel extends ISite, Document {}
+const categorySchema = new Schema<ICategory>({
+    userId: { type: Schema.Types.ObjectId, required: true },
+    title: { type: String, required: true, unique: true },
+    workspaces: [{ type: workspaceSchema }],
+})
+
+export interface ISiteModel extends ISite, Document { }
 export interface IWorkspaceModel extends IWorkspace, Document {
     sites: Types.DocumentArray<ISiteModel>;
 }
