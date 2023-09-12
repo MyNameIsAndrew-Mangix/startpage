@@ -1,24 +1,23 @@
-import {
-  Category as CategoryModel,
-  Workspace as WorkspaceModel,
-} from "../models/category";
+import { useState } from "react";
+import { Site, Workspace } from "../models/category";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useState } from "react";
-import { BiMove } from "react-icons/bi";
+import { BiTrash } from "react-icons/bi";
+import styles from "../styles/CategoryPage.module.css";
+
 interface WorkspaceProps {
-  workspace: WorkspaceModel;
-  id: string;
-  categoryId: string;
-  category: CategoryModel;
+  workspace: Workspace;
+  deleteWorkspace: (worksace: Workspace, parentCategoryId: string) => void;
+  updateWorkspace: (workspace: Workspace, content: Site[]) => void;
+  parentCategoryId: string;
 }
 
-const Workspace: React.FC<WorkspaceProps> = ({
+function WorkspaceCard({
   workspace,
-  id,
-  categoryId,
-  category,
-}) => {
+  deleteWorkspace,
+  updateWorkspace,
+  parentCategoryId,
+}: WorkspaceProps) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(true);
 
@@ -37,6 +36,16 @@ const Workspace: React.FC<WorkspaceProps> = ({
     },
     disabled: editMode,
   });
+
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
+
+  const toggleEditMode = () => {
+    setEditMode((prev) => !prev);
+    setMouseIsOver(false);
+  };
 
   const isValidUrl = (url: string | URL) => {
     try {
@@ -66,43 +75,67 @@ const Workspace: React.FC<WorkspaceProps> = ({
     }
   };
 
-  const toggleEditMode = () => {
-    setEditMode((prev) => !prev);
-    setMouseIsOver(false);
-  };
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
   if (isDragging) {
     return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="
-        opacity-30
-      bg-mainBackgroundColor p-2.5 h-[100px] min-h-[100px] items-center flex text-left rounded-xl border-2 border-rose-500  cursor-grab relative
-      "
-      />
+      <div ref={setNodeRef} style={style} className={styles.workspaceGhost} />
     );
   }
 
   if (editMode) {
     return (
-      <div ref={setNodeRef} style={style}>
-        <button onClick={openSites}>{workspace.title}</button>
-        <BiMove {...attributes} {...listeners} />
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className={styles.workspace}
+      >
+        <button
+          className=""
+          autoFocus
+          placeholder="Workspace content here"
+          onBlur={toggleEditMode}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && e.shiftKey) {
+              toggleEditMode();
+            }
+          }}
+        >
+          {workspace.title}
+        </button>
       </div>
     );
   }
+
   return (
-    <div ref={setNodeRef} style={style}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={toggleEditMode}
+      className={styles.workspace}
+      onMouseEnter={() => {
+        setMouseIsOver(true);
+      }}
+      onMouseLeave={() => {
+        setMouseIsOver(false);
+      }}
+    >
       <button onClick={openSites}>{workspace.title}</button>
-      <BiMove {...attributes} {...listeners} />
+
+      {mouseIsOver && (
+        <button
+          onClick={() => {
+            deleteWorkspace(workspace, workspace.parentCategoryId);
+          }}
+          className={styles.workspaceDelete}
+        >
+          <BiTrash />
+        </button>
+      )}
     </div>
   );
-};
+}
 
-export default Workspace;
+export default WorkspaceCard;
