@@ -12,7 +12,12 @@ import MongoStore from "connect-mongo";
 import { requiresAuth } from "../middleware/auth";
 
 const app = express();
-app.use(cors());
+app.use(cors(
+    {
+        origin: ["https://startpage-iota-rouge.vercel.app/"],
+        methods: ["POST", "GET"],
+    }
+));
 
 app.use(express.json());
 

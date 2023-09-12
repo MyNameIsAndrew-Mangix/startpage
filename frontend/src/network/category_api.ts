@@ -2,6 +2,8 @@ import { ConflictError, UnAuthorizedError } from "../errors/http_errors";
 import { Category, Workspace, Site } from "../models/category";
 import { User } from "../models/user";
 
+
+const url = "startpage-api-three.vercel.app";
 async function fetchData(input: RequestInfo, init?: RequestInit) {
     const response = await fetch(input, init);
     if (response.ok)
@@ -17,7 +19,7 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
 }
 
 export async function getLoggedInUser(): Promise<User> {
-    const response = await fetchData("/api/users", { method: "GET" });
+    const response = await fetchData(url + "/api/users", { method: "GET" });
     return response.json();
 }
 
@@ -28,7 +30,7 @@ export interface SignUpCredentials {
 }
 
 export async function signUp(credentials: SignUpCredentials): Promise<User> {
-    const response = await fetchData("/api/users/signup",
+    const response = await fetchData(url + "/api/users/signup",
         {
             method: "POST",
             headers: {
@@ -57,11 +59,11 @@ export async function login(credentials: LoginCredentials): Promise<User> {
 }
 
 export async function logout() {
-    await fetchData("/api/users/logout", { method: "POST" })
+    await fetchData(url + "/api/users/logout", { method: "POST" })
 }
 
 export async function fetchCategories(): Promise<Category[]> {
-    const response = await fetchData("/api/category", { method: "GET" });
+    const response = await fetchData(url + "/api/category", { method: "GET" });
     return (await response.json()).data;
 }
 
@@ -82,7 +84,7 @@ export interface CategoryInput {
 }
 
 export async function createCategory(category: CategoryInput): Promise<Category> {
-    const response = await fetchData("/api/category/", {
+    const response = await fetchData(url + "/api/category/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -94,7 +96,7 @@ export async function createCategory(category: CategoryInput): Promise<Category>
 }
 
 export async function updateCategory(categoryId: string, category: CategoryInput): Promise<Category> {
-    const response = await fetchData("/api/category/" + categoryId,
+    const response = await fetchData(url + "/api/category/" + categoryId,
         {
             method: "PATCH",
             headers: {
@@ -106,11 +108,11 @@ export async function updateCategory(categoryId: string, category: CategoryInput
 }
 
 export async function deleteCategory(categoryId: string) {
-    await fetchData("/api/category/" + categoryId, { method: "DELETE" });
+    await fetchData(url + "/api/category/" + categoryId, { method: "DELETE" });
 }
 
 export async function createWorkspace(workspace: WorkspaceInput, categoryId?: string) {
-    const response = await fetchData("/api/category/" + categoryId + "/workspace", {
+    const response = await fetchData(url + "/api/category/" + categoryId + "/workspace", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -122,7 +124,7 @@ export async function createWorkspace(workspace: WorkspaceInput, categoryId?: st
 }
 
 export async function deleteWorkspace(categoryId: string, workspaceId: string) {
-    await fetchData("/api/category/" + categoryId + "/workspace/" + workspaceId, { method: "DELETE" });
+    await fetchData(url + "/api/category/" + categoryId + "/workspace/" + workspaceId, { method: "DELETE" });
 }
 
 //HELPER FUNCTIONS
