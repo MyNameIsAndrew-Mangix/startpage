@@ -15,7 +15,6 @@ Since my background is in mostly strongly typed languages like C#, and when I da
 Creating extensions is a lot simpler than I thought, and I learned how much not having utility CSS classes sucks. I was told about vite, which looks like it could make the workflow significantly better. 
 ### Huge benefit learning dndkit
 One of my brainchild projects is an online card game engine(?). The idea is users will have the option to add games that aren't already added, via visual programming. This visual programming will use drag-and-drop blocks and more than likely, google's blockly. I thought about making my own scratch-like language, but there are already so many out there, and it seems like a huge undertaking.
-No matter what your experience level, being an engineer means continuously learning. Every time you build something you always have those *whoa this is awesome* or *fuck yeah I did it!* moments. This is where you should share those moments! Recruiters and interviewers love to see that you're self-aware and passionate about growing.
 
 ### Future Updates:
 Finish up the extension and find this baby a hosting service to deploy it on
