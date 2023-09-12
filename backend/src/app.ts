@@ -12,10 +12,25 @@ import MongoStore from "connect-mongo";
 import { requiresAuth } from "../middleware/auth";
 
 const app = express();
+
+// Your code
+if (process.env.NODE_ENV === "production") {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const path = require("path");
+    app.use(express.static(path.resolve(__dirname, 'client', 'build')));
+    app.get("*", (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'), function (err) {
+            if (err) {
+                res.status(500).send(err)
+            }
+        });
+    })
+}
+// Your code
+
 app.use(cors(
     {
-        origin: ["https://startpage-iota-rouge.vercel.app/"],
-        methods: ["POST", "GET"],
+        origin: ["http://localhost:3000"],
     }
 ));
 
