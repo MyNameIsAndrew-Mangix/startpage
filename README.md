@@ -2,7 +2,6 @@
 I don't like using bookmarks, and I haven't look into optimizing them if it's possible. This app works with an extension and an API to get, store, and open groups of tabs at a time. Let's be honest, most people have windows filled with tabs they don't want to close.
 **Link to project:** coming soon (looking for hosting service)
 
-![alt tag](http://placecorgi.com/1200/650)
 
 ## How It's Made:
 
