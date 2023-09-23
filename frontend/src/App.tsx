@@ -11,9 +11,6 @@ import NotFoundPage from "./pages/NotFoundPage";
 import stylesUtil from "./styles/utils.module.css";
 
 function App() {
-  const initialHidePopup = localStorage.getItem("hidePopup") === "true";
-  const [hidePopup, setHidePopup] = useState(initialHidePopup);
-
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
   const [showSignUpModal, setShowSignUpModal] = useState(false);
@@ -31,29 +28,10 @@ function App() {
     fetchLoggedInUser();
   }, []);
 
-  const onClosePopup = () => {
-    setHidePopup(true);
-  };
-
-  const onEnablePopups = () => {
-    setHidePopup(true);
-    window.open(
-      "https://lmgt.org/?q=how+do+I+allow+popups+for+a+site+on+my+browser",
-      "_blank"
-    );
-  };
-
   return (
     <BrowserRouter>
       <div className="App">
-        <div>
-          {!hidePopup && (
-            <PopupModal
-              onClose={onClosePopup}
-              onEnablePopups={onEnablePopups}
-            />
-          )}
-        </div>
+        <PopupModal />
         <div>
           <NavBar
             loggedInUser={loggedInUser}

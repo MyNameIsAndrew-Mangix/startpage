@@ -12,3 +12,7 @@
 .whiteText {
   color: #ffffff;
 }
+
+.checkboxText {
+  padding-left: 4px;
+}
