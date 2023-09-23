@@ -1,3 +1,5 @@
+const API_BASE_URL = "http://localhost:5000/api";
+
 document.addEventListener("DOMContentLoaded", async () => {
   const appContainer = document.getElementById("app");
 
@@ -129,7 +131,7 @@ async function fetchLoggedInUser() {
 
 async function getLoggedInUser() {
   try {
-    const response = await fetch("http://localhost:5000/api/users", {
+    const response = await fetch(`${API_BASE_URL}/users`, {
       method: "GET",
       credentials: "include",
     });
@@ -144,7 +146,7 @@ async function getLoggedInUser() {
 
 async function sendLogin(username, password) {
   try {
-    const response = await fetch("http://localhost:5000/api/users/login", {
+    const response = await fetch(`${API_BASE_URL}/users/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -167,7 +169,7 @@ function sendSubmitSuccess(form, successMessage, submitButton) {
 }
 
 async function sendWorkspaceToApi(workspace) {
-  const apiUrl = "http://localhost:5000/api/category/workspace";
+  const apiUrl = `"${API_BASE_URL}/category/workspace"`;
 
   try {
     const response = await fetch(apiUrl, {
