@@ -50,6 +50,10 @@ function CategoryPageLoggedInView({
     useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
 
+  const [originalParentCategoryId, setOriginalParentCategoryId] = useState<
+    string | null
+  >(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -131,13 +135,11 @@ function CategoryPageLoggedInView({
     parentCategoryId: string
   ) {
     try {
-      console.log("hi");
       console.log(workspace);
       if (!workspace.parentCategoryId) {
         workspace.parentCategoryId = parentCategoryId;
       }
       if (workspace.parentCategoryId) {
-        console.log("hi again");
         await CategoryApi.deleteWorkspace(
           workspace.parentCategoryId,
           workspace._id
@@ -204,13 +206,15 @@ function CategoryPageLoggedInView({
     }
   }
 
-  async function updateCategory(category: CategoryModel, title: string) {
-    setCategories((prevCategories) =>
-      prevCategories.map((cat) => {
-        if (cat._id !== category._id) return cat;
-        return { ...cat, title };
-      })
-    );
+  async function updateCategory(category: CategoryModel, title?: string) {
+    if (title) {
+      setCategories((prevCategories) =>
+        prevCategories.map((cat) => {
+          if (cat._id !== category._id) return cat;
+          return { ...cat, title };
+        })
+      );
+    }
 
     try {
       await CategoryApi.updateCategory(
@@ -227,31 +231,63 @@ function CategoryPageLoggedInView({
   function onDragEnd(event: DragEndEvent) {
     setActiveCategory(null);
     setActiveWorkspace(null);
-
     const { active, over } = event;
     if (!over) return;
 
     const activeId = active.id;
     const overId = over.id;
 
-    if (activeId === overId) return;
+    const isActiveAWorkspace = active.data.current?.type === "Workspace";
+    if (activeId === overId) {
+      if (
+        isActiveAWorkspace &&
+        active.data.current?.workspace.parentCategoryId !==
+          originalParentCategoryId
+      ) {
+        console.log("hello");
+        const overWorkspace: WorkspaceModel = over.data.current?.workspace;
+        const overCatId = overWorkspace.parentCategoryId;
+        setCategories((categories) => {
+          return categories.map((category) => {
+            if (category._id === String(overCatId)) {
+              const updatedCategory = {
+                ...category,
+                workspaces: [...category.workspaces, overWorkspace],
+              };
+              return updatedCategory;
+            } else if (category._id === originalParentCategoryId) {
+              const updatedCategory = {
+                ...category,
+                workspaces: category.workspaces.filter(
+                  (workspace) => workspace._id !== String(activeId)
+                ),
+              };
+              return updatedCategory;
+            } else {
+              return category;
+            }
+          });
+        });
+        //updateCategories(categories);
+        setOriginalParentCategoryId(null);
+      }
+      return;
+    }
 
     const isActiveACategory = active.data.current?.type === "Category";
-    if (!isActiveACategory) return;
+    if (isActiveACategory) {
+      setCategories((categories) => {
+        const activeCategoryIndex = categories.findIndex(
+          (cat) => cat._id === activeId
+        );
 
-    console.log("DRAG END");
+        const overCategoryIndex = categories.findIndex(
+          (cat) => cat._id === overId
+        );
 
-    setCategories((categories) => {
-      const activeCategoryIndex = categories.findIndex(
-        (cat) => cat._id === activeId
-      );
-
-      const overCategoryIndex = categories.findIndex(
-        (cat) => cat._id === overId
-      );
-
-      return arrayMove(categories, activeCategoryIndex, overCategoryIndex);
-    });
+        return arrayMove(categories, activeCategoryIndex, overCategoryIndex);
+      });
+    }
   }
 
   function onDragOver(event: DragOverEvent) {
@@ -270,8 +306,10 @@ function CategoryPageLoggedInView({
 
     if (isActiveAWorkspace && isOverAWorkspace) {
       setWorkspaces((workspaces) => {
-        const activeIndex = workspaces.findIndex((t) => t._id === activeId);
-        const overIndex = workspaces.findIndex((t) => t._id === overId);
+        const activeIndex = workspaces.findIndex(
+          (work) => work._id === activeId
+        );
+        const overIndex = workspaces.findIndex((work) => work._id === overId);
 
         if (
           workspaces[activeIndex].parentCategoryId !==
@@ -290,14 +328,17 @@ function CategoryPageLoggedInView({
 
     if (isActiveAWorkspace && isOverACategory) {
       setWorkspaces((workspaces) => {
-        const activeIndex = workspaces.findIndex((t) => t._id === activeId);
-
+        const activeIndex = workspaces.findIndex(
+          (work) => work._id === activeId
+        );
         workspaces[activeIndex].parentCategoryId = String(overId);
-        console.log("DROPPING TASK OVER COLUMN", { activeIndex });
         return arrayMove(workspaces, activeIndex, activeIndex);
       });
+      console.log(active.data.current?.workspace.parentCategoryId);
+      console.log(categories);
     }
   }
+
   const categoryGrid = (
     <div className={styles.categoryGrid} style={{ margin: "auto" }}>
       <div className={styles.categoryGrid}>

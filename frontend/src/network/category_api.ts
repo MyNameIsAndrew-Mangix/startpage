@@ -79,6 +79,7 @@ export interface WorkspaceInput {
 
 export interface CategoryInput {
     title: string,
+    id: string,
     workspaces: WorkspaceInput[],
 }
 
@@ -130,6 +131,7 @@ export async function deleteWorkspace(categoryId: string, workspaceId: string) {
 export function categoryToCategoryInput(category: Category): CategoryInput {
     return {
         title: category.title,
+        id: category._id,
         workspaces: category.workspaces.map((workspace) =>
             workspaceToWorkspaceInput(workspace)
         ),

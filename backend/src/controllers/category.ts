@@ -258,10 +258,10 @@ export const updateCategory: RequestHandler = async (req, res, next) => {
         if (!updatedData.title)
             throw createHttpError(400, "Category must have title");
 
-        const updatedCategory: models.ICategoryModel | null = await models.CategoryModel.findByIdAndUpdate(categoryId, updatedData, { new: true });
+        const updatedCategory: models.ICategoryModel | null = await models.CategoryModel.findByIdAndUpdate({ _id: categoryId, userId: authenticatedUserId }, updatedData, { new: true });
 
         if (!updatedCategory?.userId.equals(authenticatedUserId))
-            throw createHttpError(401, "You cannot access this category");
+            throw createHttpError(404, "Category not found");
         if (updatedCategory) {
             return sendSuccessResponse(res, 200, "Category successfully updated", updatedCategory);
         }
@@ -316,7 +316,7 @@ async function findWorkspaceByIdInCategoryOrFail(category: models.ICategoryModel
     //checking if category is owned by user. The category passed should ALWAYS be checked already, but just in case.
     assertIsDefined(authenticatedUserId)
     if (!category.userId.equals(authenticatedUserId)) {
-        throw createHttpError(404, "You cannot access this category");
+        throw createHttpError(403, "You cannot access this category");
     }
     const cat: models.ICategoryModel | null = await models.CategoryModel.findOne({ _id: category._id, userId: authenticatedUserId });
     const workspace = cat?.workspaces.id(workspaceId);

@@ -28,11 +28,13 @@ if (process.env.NODE_ENV === "production") {
 }
 // Your code
 
-app.use(cors(
-    {
-        origin: ["http://localhost:3000"],
-    }
-));
+app.use(cors({
+    origin: 'chrome-extension://amfdegaanekhedpenbdamalfmpebgnhh',
+    credentials: true,
+}));
+// {
+// origin: ["http://localhost:3000", ""],
+// }
 
 app.use(express.json());
 
@@ -41,7 +43,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 60 * 60 * 1000,
+        maxAge: 8 * 60 * 60 * 1000,
     },
     rolling: true,
     store: MongoStore.create({
