@@ -4,6 +4,7 @@ import * as CategoriesController from "../controllers/category";
 const router = express.Router();
 
 router.get("/", CategoriesController.getCategories);
+router.patch("/", CategoriesController.updateCategories);
 
 router.get("/:categoryId", CategoriesController.getCategory);
 router.post("/", CategoriesController.createCategory);

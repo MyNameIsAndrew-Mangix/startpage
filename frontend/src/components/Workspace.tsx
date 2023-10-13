@@ -1,25 +1,28 @@
 import { useState } from "react";
-import { Site, Workspace } from "../models/category";
+import {
+  Site as SiteModel,
+  Workspace as WorkspaceModel,
+} from "../models/category";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { BiTrash } from "react-icons/bi";
 import styles from "../styles/CategoryPage.module.css";
 
 interface WorkspaceProps {
-  workspace: Workspace;
-  deleteWorkspace: (worksace: Workspace, parentCategoryId: string) => void;
-  updateWorkspace: (workspace: Workspace, content: Site[]) => void;
+  workspace: WorkspaceModel;
+  deleteWorkspace: (worksace: WorkspaceModel, parentCategoryId: string) => void;
+  updateWorkspace: (workspace: WorkspaceModel, content: SiteModel[]) => void;
   parentCategoryId: string;
 }
 
-function WorkspaceCard({
+function Workspace({
   workspace,
   deleteWorkspace,
   updateWorkspace,
   parentCategoryId,
 }: WorkspaceProps) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
-  const [editMode, setEditMode] = useState(true);
+  const [editMode, setEditMode] = useState(false);
 
   const {
     setNodeRef,
@@ -113,7 +116,7 @@ function WorkspaceCard({
       style={style}
       {...attributes}
       {...listeners}
-      onClick={toggleEditMode}
+      //onClick={toggleEditMode}
       className={styles.workspace}
       onMouseEnter={() => {
         setMouseIsOver(true);
@@ -138,4 +141,4 @@ function WorkspaceCard({
   );
 }
 
-export default WorkspaceCard;
+export default Workspace;

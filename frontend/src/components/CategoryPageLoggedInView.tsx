@@ -54,6 +54,8 @@ function CategoryPageLoggedInView({
     string | null
   >(null);
 
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -80,12 +82,20 @@ function CategoryPageLoggedInView({
       setShowCatgoriesLoadingError(true);
     } finally {
       setCategoriesLoading(false);
+      setInitialDataLoaded(true);
     }
   }
 
   useEffect(() => {
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    console.log(initialDataLoaded);
+    if (initialDataLoaded) {
+      console.log(`State has changed for ${workspaces}`);
+    }
+  }, [workspaces, initialDataLoaded]);
 
   async function createWorkspace(categoryId: string) {
     try {
@@ -226,7 +236,17 @@ function CategoryPageLoggedInView({
     }
   }
 
-  function onDragStart(event: DragStartEvent) {}
+  function onDragStart(event: DragStartEvent) {
+    if (event.active.data.current?.type === "Category") {
+      setActiveCategory(event.active.data.current.category);
+      return;
+    }
+
+    if (event.active.data.current?.type === "Workspace") {
+      setActiveWorkspace(event.active.data.current.workspace);
+      return;
+    }
+  }
 
   function onDragEnd(event: DragEndEvent) {
     setActiveCategory(null);
@@ -237,40 +257,7 @@ function CategoryPageLoggedInView({
     const activeId = active.id;
     const overId = over.id;
 
-    const isActiveAWorkspace = active.data.current?.type === "Workspace";
     if (activeId === overId) {
-      if (
-        isActiveAWorkspace &&
-        active.data.current?.workspace.parentCategoryId !==
-          originalParentCategoryId
-      ) {
-        console.log("hello");
-        const overWorkspace: WorkspaceModel = over.data.current?.workspace;
-        const overCatId = overWorkspace.parentCategoryId;
-        setCategories((categories) => {
-          return categories.map((category) => {
-            if (category._id === String(overCatId)) {
-              const updatedCategory = {
-                ...category,
-                workspaces: [...category.workspaces, overWorkspace],
-              };
-              return updatedCategory;
-            } else if (category._id === originalParentCategoryId) {
-              const updatedCategory = {
-                ...category,
-                workspaces: category.workspaces.filter(
-                  (workspace) => workspace._id !== String(activeId)
-                ),
-              };
-              return updatedCategory;
-            } else {
-              return category;
-            }
-          });
-        });
-        //updateCategories(categories);
-        setOriginalParentCategoryId(null);
-      }
       return;
     }
 
@@ -284,10 +271,9 @@ function CategoryPageLoggedInView({
         const overCategoryIndex = categories.findIndex(
           (cat) => cat._id === overId
         );
-
         return arrayMove(categories, activeCategoryIndex, overCategoryIndex);
       });
-    }
+    } else return;
   }
 
   function onDragOver(event: DragOverEvent) {
@@ -310,13 +296,13 @@ function CategoryPageLoggedInView({
           (work) => work._id === activeId
         );
         const overIndex = workspaces.findIndex((work) => work._id === overId);
-
         if (
           workspaces[activeIndex].parentCategoryId !==
           workspaces[overIndex].parentCategoryId
         ) {
           workspaces[activeIndex].parentCategoryId =
             workspaces[overIndex].parentCategoryId;
+
           return arrayMove(workspaces, activeIndex, overIndex - 1);
         }
 
@@ -334,8 +320,6 @@ function CategoryPageLoggedInView({
         workspaces[activeIndex].parentCategoryId = String(overId);
         return arrayMove(workspaces, activeIndex, activeIndex);
       });
-      console.log(active.data.current?.workspace.parentCategoryId);
-      console.log(categories);
     }
   }
 

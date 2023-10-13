@@ -247,6 +247,41 @@ export const getCategory: RequestHandler = async (req, res, next) => {
         next(error)
     }
 }
+
+export const updateCategories: RequestHandler = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const updatedCategoriesData: models.ICategoryModel[] = req.body;
+    try {
+        assertIsDefined(authenticatedUserId);
+        // Validate the request data as needed (e.g., existence of title)
+        for (const updatedCategoryData of updatedCategoriesData) {
+            if (!updatedCategoryData.title) {
+                throw createHttpError(400, "Category must have title");
+            }
+        }
+
+        // Create an array to store the updated category documents
+        const updatedCategories: models.ICategoryModel[] = [];
+
+        for (const updatedCategoryData of updatedCategoriesData) {
+            if (!mongoose.isValidObjectId(updatedCategoryData._id)) {
+                throw createHttpError(400, "Invalid ID format");
+            }
+
+            const updatedCategory: models.ICategoryModel | null = await models.CategoryModel.findByIdAndUpdate({ _id: updatedCategoryData._id, userId: authenticatedUserId }, updatedCategoryData, { new: true });
+
+            if (!updatedCategory || !updatedCategory.userId.equals(authenticatedUserId)) {
+                throw createHttpError(404, "Category not found");
+            }
+
+            updatedCategories.push(updatedCategory);
+        }
+
+        return sendSuccessResponse(res, 200, "Categories successfully updated", updatedCategories);
+    } catch (error) {
+        next(error);
+    }
+}
 export const updateCategory: RequestHandler = async (req, res, next) => {
     const categoryId: string | null = req.params.categoryId;
     const updatedData: models.ICategoryModel = req.body;
@@ -294,6 +329,7 @@ const createUncategorizedWorkspace = async (newWorkspace: models.IWorkspaceModel
     assertIsDefined(authenticatedUserId)
     const uncategorizedCategory = await findOrCreateUncategorizedCategory(authenticatedUserId);
 
+    newWorkspace.parentCategoryId = uncategorizedCategory._id;
     uncategorizedCategory.workspaces.push(newWorkspace);
     await uncategorizedCategory.save();
     return uncategorizedCategory;

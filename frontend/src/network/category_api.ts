@@ -83,6 +83,17 @@ export interface CategoryInput {
     workspaces: WorkspaceInput[],
 }
 
+export async function updateCategories(categories: CategoryInput[]): Promise<Category[]> {
+    const response = await fetchData("/api/category/", {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(categories)
+    });
+    return response.json();
+}
+
 export async function createCategory(category: CategoryInput): Promise<Category> {
     const response = await fetchData("/api/category/", {
         method: "POST",
