@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   Category as CategoryModel,
   Workspace as WorkspaceModel,
@@ -20,41 +20,31 @@ import Workspace from "./Workspace";
 import styles from "../styles/CategoryPage.module.css";
 import Category from "./Category";
 import * as CategoryApi from "../network/category_api";
-import { Spinner } from "react-bootstrap";
+import { Button, Spinner } from "react-bootstrap";
 import { User } from "../models/user";
 
 interface CategoryPageLoggedInViewProps {
   loggedInUser: User;
 }
 
-function CategoryPageLoggedInView({
-  loggedInUser,
-}: CategoryPageLoggedInViewProps) {
+function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProps) {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
-  const categoriesId = useMemo(
-    () => categories.map((cat) => cat._id),
-    [categories]
-  );
+  const categoriesId = useMemo(() => categories.map((cat) => cat._id), [categories]);
 
   const [workspaces, setWorkspaces] = useState<WorkspaceModel[]>([]);
 
-  const [activeCategory, setActiveCategory] = useState<CategoryModel | null>(
-    null
-  );
+  const [activeCategory, setActiveCategory] = useState<CategoryModel | null>(null);
 
-  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceModel | null>(
-    null
-  );
+  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceModel | null>(null);
 
-  const [showCategoriesLoadingError, setShowCatgoriesLoadingError] =
-    useState(false);
+  const [showCategoriesLoadingError, setShowCatgoriesLoadingError] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
 
-  const [originalParentCategoryId, setOriginalParentCategoryId] = useState<
-    string | null
-  >(null);
+  // const [originalParentCategoryId, setOriginalParentCategoryId] = useState<
+  //   string | null
+  // >(null);
 
-  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -70,10 +60,7 @@ function CategoryPageLoggedInView({
       const categoriesData = await CategoryApi.fetchCategories();
       setCategories(categoriesData);
       const allWorkspaces = categoriesData.reduce(
-        (acc: WorkspaceModel[], category: CategoryModel) => [
-          ...acc,
-          ...category.workspaces,
-        ],
+        (acc: WorkspaceModel[], category: CategoryModel) => [...acc, ...category.workspaces],
         []
       );
       setWorkspaces(allWorkspaces);
@@ -82,7 +69,6 @@ function CategoryPageLoggedInView({
       setShowCatgoriesLoadingError(true);
     } finally {
       setCategoriesLoading(false);
-      setInitialDataLoaded(true);
     }
   }
 
@@ -90,20 +76,12 @@ function CategoryPageLoggedInView({
     loadCategories();
   }, []);
 
-  useEffect(() => {
-    console.log(initialDataLoaded);
-    if (initialDataLoaded) {
-      console.log(`State has changed for ${workspaces}`);
-    }
-  }, [workspaces, initialDataLoaded]);
-
   async function createWorkspace(categoryId: string) {
     try {
       const workspaceToAdd: WorkspaceModel = {
         _id: "",
         title: `Workspace ${
-          (categories.find((category) => category._id === categoryId)
-            ?.workspaces?.length || 0) + 1
+          (categories.find((category) => category._id === categoryId)?.workspaces?.length || 0) + 1
         }`,
         parentCategoryId: categoryId,
       };
@@ -116,16 +94,14 @@ function CategoryPageLoggedInView({
       const catIndex = categories.findIndex((cat) => cat._id === categoryId);
       if (catIndex !== -1) {
         const updatedCategory = { ...categories[catIndex] };
-        updatedCategory.workspaces = [
-          ...updatedCategory.workspaces,
-          newWorkspace,
-        ];
+        updatedCategory.workspaces = [...updatedCategory.workspaces, newWorkspace];
         setCategories((prevCategories) => {
           const updatedCategories = [...prevCategories];
           updatedCategories[catIndex] = updatedCategory;
           return updatedCategories;
         });
       }
+      setHasChanges(true);
     } catch (error) {
       alert(error);
     }
@@ -138,26 +114,19 @@ function CategoryPageLoggedInView({
       return { ...work, content };
     });
     setWorkspaces(updatedWorkspaces);
+    setHasChanges(true);
     alert("to be implemented");
   }
-  async function deleteWorkspace(
-    workspace: WorkspaceModel,
-    parentCategoryId: string
-  ) {
+  async function deleteWorkspace(workspace: WorkspaceModel, parentCategoryId: string) {
     try {
       console.log(workspace);
       if (!workspace.parentCategoryId) {
         workspace.parentCategoryId = parentCategoryId;
       }
       if (workspace.parentCategoryId) {
-        await CategoryApi.deleteWorkspace(
-          workspace.parentCategoryId,
-          workspace._id
-        );
+        await CategoryApi.deleteWorkspace(workspace.parentCategoryId, workspace._id);
         setWorkspaces((prevWorkspaces) =>
-          prevWorkspaces.filter(
-            (existingWorkspace) => existingWorkspace._id !== workspace._id
-          )
+          prevWorkspaces.filter((existingWorkspace) => existingWorkspace._id !== workspace._id)
         );
         const catIndex = categories.findIndex((cat) =>
           cat.workspaces.some((work) => work._id === workspace._id)
@@ -174,6 +143,7 @@ function CategoryPageLoggedInView({
           });
         }
       }
+      setHasChanges(true);
     } catch (error) {
       console.log(error);
       alert(error);
@@ -192,6 +162,7 @@ function CategoryPageLoggedInView({
         CategoryApi.categoryToCategoryInput(categoryToAdd)
       );
       setCategories([...categories, await categoryPromise]);
+      setHasChanges(true);
     } catch (error) {
       alert(error);
     }
@@ -200,16 +171,9 @@ function CategoryPageLoggedInView({
   async function deleteCategory(category: CategoryModel) {
     try {
       await CategoryApi.deleteCategory(category._id);
-      setCategories(
-        categories.filter(
-          (existingCategory) => existingCategory._id !== category._id
-        )
-      );
-      setWorkspaces(
-        workspaces.filter(
-          (workspace) => workspace.parentCategoryId !== category._id
-        )
-      );
+      setCategories(categories.filter((existingCategory) => existingCategory._id !== category._id));
+      setWorkspaces(workspaces.filter((workspace) => workspace.parentCategoryId !== category._id));
+      setHasChanges(true);
     } catch (error) {
       console.log(error);
       alert(error);
@@ -217,23 +181,31 @@ function CategoryPageLoggedInView({
   }
 
   async function updateCategory(category: CategoryModel, title?: string) {
-    if (title) {
-      setCategories((prevCategories) =>
-        prevCategories.map((cat) => {
-          if (cat._id !== category._id) return cat;
-          return { ...cat, title };
-        })
-      );
-    }
-
     try {
-      await CategoryApi.updateCategory(
-        category._id,
-        CategoryApi.categoryToCategoryInput(category)
-      );
+      if (title) {
+        setCategories((prevCategories) =>
+          prevCategories.map((cat) => {
+            if (cat._id !== category._id) return cat;
+            return { ...cat, title };
+          })
+        );
+      }
+      await CategoryApi.updateCategory(category._id, CategoryApi.categoryToCategoryInput(category));
+      setHasChanges(true);
     } catch (error) {
       alert(error);
     }
+  }
+
+  function handleConfirm() {
+    console.log("Function not implemented");
+    // try {
+    //   const updatedCategories = categories.map((category) => {
+    //     return CategoryApi.categoryToCategoryInput(category);
+    //   });
+    //   CategoryApi.updateCategories(updatedCategories);
+    setHasChanges(false);
+    // } catch (error) {}
   }
 
   function onDragStart(event: DragStartEvent) {
@@ -264,16 +236,16 @@ function CategoryPageLoggedInView({
     const isActiveACategory = active.data.current?.type === "Category";
     if (isActiveACategory) {
       setCategories((categories) => {
-        const activeCategoryIndex = categories.findIndex(
-          (cat) => cat._id === activeId
-        );
+        const activeCategoryIndex = categories.findIndex((cat) => cat._id === activeId);
 
-        const overCategoryIndex = categories.findIndex(
-          (cat) => cat._id === overId
-        );
+        const overCategoryIndex = categories.findIndex((cat) => cat._id === overId);
         return arrayMove(categories, activeCategoryIndex, overCategoryIndex);
       });
-    } else return;
+      setHasChanges(true);
+    } else {
+      setHasChanges(true);
+      return;
+    }
   }
 
   function onDragOver(event: DragOverEvent) {
@@ -292,20 +264,14 @@ function CategoryPageLoggedInView({
 
     if (isActiveAWorkspace && isOverAWorkspace) {
       setWorkspaces((workspaces) => {
-        const activeIndex = workspaces.findIndex(
-          (work) => work._id === activeId
-        );
+        const activeIndex = workspaces.findIndex((work) => work._id === activeId);
         const overIndex = workspaces.findIndex((work) => work._id === overId);
-        if (
-          workspaces[activeIndex].parentCategoryId !==
-          workspaces[overIndex].parentCategoryId
-        ) {
-          workspaces[activeIndex].parentCategoryId =
-            workspaces[overIndex].parentCategoryId;
-
+        if (workspaces[activeIndex].parentCategoryId !== workspaces[overIndex].parentCategoryId) {
+          workspaces[activeIndex].parentCategoryId = workspaces[overIndex].parentCategoryId;
+          setHasChanges(true);
           return arrayMove(workspaces, activeIndex, overIndex - 1);
         }
-
+        setHasChanges(true);
         return arrayMove(workspaces, activeIndex, overIndex);
       });
     }
@@ -314,12 +280,11 @@ function CategoryPageLoggedInView({
 
     if (isActiveAWorkspace && isOverACategory) {
       setWorkspaces((workspaces) => {
-        const activeIndex = workspaces.findIndex(
-          (work) => work._id === activeId
-        );
+        const activeIndex = workspaces.findIndex((work) => work._id === activeId);
         workspaces[activeIndex].parentCategoryId = String(overId);
         return arrayMove(workspaces, activeIndex, activeIndex);
       });
+      setHasChanges(true);
     }
   }
 
@@ -336,9 +301,7 @@ function CategoryPageLoggedInView({
               createWorkspace={createWorkspace}
               deleteWorkspace={deleteWorkspace}
               updateWorkspace={updateWorkspace}
-              workspaces={workspaces.filter(
-                (workspace) => workspace.parentCategoryId === cat._id
-              )}
+              workspaces={workspaces.filter((workspace) => workspace.parentCategoryId === cat._id)}
             />
           ))}
         </SortableContext>
@@ -363,16 +326,10 @@ function CategoryPageLoggedInView({
         onDragOver={onDragOver}
       >
         {categoriesLoading && <Spinner animation="border" variant="primary" />}
-        {showCategoriesLoadingError && (
-          <p>Something went wrong, please refresh the page.</p>
-        )}
+        {showCategoriesLoadingError && <p>Something went wrong, please refresh the page.</p>}
         {!categoriesLoading && !showCategoriesLoadingError && (
           <>
-            {categories.length > 0 ? (
-              categoryGrid
-            ) : (
-              <p>You don't have any workspaces setup yet!</p>
-            )}
+            {categories.length > 0 ? categoryGrid : <p>You don't have any workspaces setup yet!</p>}
           </>
         )}
 
@@ -387,8 +344,7 @@ function CategoryPageLoggedInView({
                 deleteWorkspace={deleteWorkspace}
                 updateWorkspace={updateWorkspace}
                 workspaces={workspaces.filter(
-                  (workspace) =>
-                    workspace.parentCategoryId === activeCategory._id
+                  (workspace) => workspace.parentCategoryId === activeCategory._id
                 )}
               />
             )}
@@ -398,9 +354,8 @@ function CategoryPageLoggedInView({
                 deleteWorkspace={deleteWorkspace}
                 updateWorkspace={updateWorkspace}
                 parentCategoryId={
-                  workspaces.find(
-                    (workspace) => workspace._id === activeWorkspace._id
-                  )?.parentCategoryId || ""
+                  workspaces.find((workspace) => workspace._id === activeWorkspace._id)
+                    ?.parentCategoryId || ""
                 }
               />
             )}
@@ -408,6 +363,13 @@ function CategoryPageLoggedInView({
           document.body
         )}
       </DndContext>
+      <Button
+        variant={hasChanges ? "primary" : "secondary"}
+        onClick={handleConfirm}
+        disabled={!hasChanges}
+      >
+        Confirm changes
+      </Button>
     </div>
   );
 }
