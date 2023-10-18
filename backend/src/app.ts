@@ -29,12 +29,10 @@ if (process.env.NODE_ENV === "production") {
 // Your code
 
 app.use(cors({
-    origin: 'chrome-extension://amfdegaanekhedpenbdamalfmpebgnhh',
+    origin: ['chrome-extension://amfdegaanekhedpenbdamalfmpebgnhh', 'http://localhost:3000'],
     credentials: true,
 }));
-// {
-// origin: ["http://localhost:3000", ""],
-// }
+
 
 app.use(express.json());
 

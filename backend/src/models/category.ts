@@ -13,6 +13,7 @@ interface IWorkspace {
 
 interface ICategory {
     title: string;
+    order?: number;
     workspaces?: IWorkspace[];
     userId: Types.ObjectId;
 }
@@ -24,14 +25,15 @@ const siteSchema = new Schema<ISite>({
 
 const workspaceSchema = new Schema<IWorkspace>({
     title: { type: String, required: true },
-    sites: [{ type: siteSchema }],
+    sites: [siteSchema],
     parentCategoryId: { type: String, required: true }
 })
 
 const categorySchema = new Schema<ICategory>({
     userId: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true, unique: true },
-    workspaces: [{ type: workspaceSchema }],
+    order: { type: Number },
+    workspaces: [workspaceSchema],
 })
 
 export interface ISiteModel extends ISite, Document { }

@@ -3,7 +3,7 @@ import { Category, Workspace, Site } from "../models/category";
 import { User } from "../models/user";
 
 
-async function fetchData(input: RequestInfo, init?: RequestInit) {
+export async function fetchData(input: RequestInfo, init?: RequestInit) {
     const response = await fetch(input, init);
     if (response.ok)
         return response;
@@ -79,7 +79,8 @@ export interface WorkspaceInput {
 
 export interface CategoryInput {
     title: string,
-    id: string,
+    _id: string,
+    order: number,
     workspaces: WorkspaceInput[],
 }
 
@@ -142,7 +143,8 @@ export async function deleteWorkspace(categoryId: string, workspaceId: string) {
 export function categoryToCategoryInput(category: Category): CategoryInput {
     return {
         title: category.title,
-        id: category._id,
+        _id: category._id,
+        order: category.order,
         workspaces: category.workspaces.map((workspace) =>
             workspaceToWorkspaceInput(workspace)
         ),

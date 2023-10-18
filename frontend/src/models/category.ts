@@ -15,5 +15,6 @@ export interface Category {
     userId: string,
     _id: string,
     title: string,
+    order: number,
     workspaces: Workspace[]
 }

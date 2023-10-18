@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Category as CategoryModel,
   Workspace as WorkspaceModel,
@@ -37,12 +37,10 @@ function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProp
 
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceModel | null>(null);
 
+  const [originalParentCategoryId, setOriginalParentCategoryId] = useState<string | null>(null);
+
   const [showCategoriesLoadingError, setShowCatgoriesLoadingError] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-
-  // const [originalParentCategoryId, setOriginalParentCategoryId] = useState<
-  //   string | null
-  // >(null);
 
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -58,6 +56,7 @@ function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProp
       setShowCatgoriesLoadingError(false);
       setCategoriesLoading(true);
       const categoriesData = await CategoryApi.fetchCategories();
+      categoriesData.sort((a, b) => a.order - b.order);
       setCategories(categoriesData);
       const allWorkspaces = categoriesData.reduce(
         (acc: WorkspaceModel[], category: CategoryModel) => [...acc, ...category.workspaces],
@@ -155,6 +154,7 @@ function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProp
       _id: "",
       workspaces: [],
       title: `Category ${categories.length + 1}`,
+      order: categories.length + 1,
       userId: loggedInUser._id,
     };
     try {
@@ -197,15 +197,17 @@ function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProp
     }
   }
 
-  function handleConfirm() {
-    console.log("Function not implemented");
-    // try {
-    //   const updatedCategories = categories.map((category) => {
-    //     return CategoryApi.categoryToCategoryInput(category);
-    //   });
-    //   CategoryApi.updateCategories(updatedCategories);
-    setHasChanges(false);
-    // } catch (error) {}
+  async function handleConfirm() {
+    try {
+      const updatedCategories = categories.map((category, index) => {
+        return CategoryApi.categoryToCategoryInput({ ...category, order: index });
+      });
+      await CategoryApi.updateCategories(updatedCategories);
+      setHasChanges(false);
+    } catch (error) {
+      alert(error);
+      console.log(error);
+    }
   }
 
   function onDragStart(event: DragStartEvent) {
@@ -235,12 +237,14 @@ function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProp
 
     const isActiveACategory = active.data.current?.type === "Category";
     if (isActiveACategory) {
+      console.log(categories);
       setCategories((categories) => {
         const activeCategoryIndex = categories.findIndex((cat) => cat._id === activeId);
 
         const overCategoryIndex = categories.findIndex((cat) => cat._id === overId);
         return arrayMove(categories, activeCategoryIndex, overCategoryIndex);
       });
+      console.log(categories);
       setHasChanges(true);
     } else {
       setHasChanges(true);
@@ -266,9 +270,24 @@ function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProp
       setWorkspaces((workspaces) => {
         const activeIndex = workspaces.findIndex((work) => work._id === activeId);
         const overIndex = workspaces.findIndex((work) => work._id === overId);
+        setOriginalParentCategoryId(workspaces[activeIndex].parentCategoryId);
+
         if (workspaces[activeIndex].parentCategoryId !== workspaces[overIndex].parentCategoryId) {
           workspaces[activeIndex].parentCategoryId = workspaces[overIndex].parentCategoryId;
           setHasChanges(true);
+
+          if (originalParentCategoryId !== workspaces[activeIndex].parentCategoryId) {
+            const updatedCategories = categories.map((category) => {
+              const updatedCategory = { ...category };
+              updatedCategory.workspaces = workspaces.filter((workspace) => {
+                return workspace.parentCategoryId === updatedCategory._id;
+              });
+              return updatedCategory;
+            });
+            console.log(updatedCategories);
+            setCategories(updatedCategories);
+          }
+          setOriginalParentCategoryId(null);
           return arrayMove(workspaces, activeIndex, overIndex - 1);
         }
         setHasChanges(true);

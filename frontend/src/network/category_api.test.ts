@@ -1,60 +1,77 @@
-import React from "react";
-import { render } from "react-dom";
-import { act } from "react-dom/test-utils";
+// category_api.test.ts
 import * as CategoryApi from "./category_api";
 
+describe('updateCategories', () => {
+    it('should update categories and return the updated data', async () => {
+        // Define a sample category input for the update
 
-const MOCK_DATA = [
-    {
-        _id: "64f5d22c4b4b66d33b8d03e3",
-        title: "this is a test",
-        workspaces: [{
-            title: "Unity",
-            sites: [{
-                title: "What Should I Make? Beginner Programming Project Ideas - Programming for Beginners",
-                url: "https://www.programmingforbeginnersbook.com/blog/what_should_i_make_beginner_programming_project_ideas/",
-                _id: "650e1cccd4428ac3fb4f1703"
+        const categoryInput = {
+            _id: "64f5d22c4b4b66d33b8d03e3",
+            title: "this is a test",
+            order: 0,
+            workspaces: [{
+                title: "Unity",
+                sites: [{
+                    title: "What Should I Make? Beginner Programming Project Ideas - Programming for Beginners",
+                    url: "https://www.programmingforbeginnersbook.com/blog/what_should_i_make_beginner_programming_project_ideas/",
+                },
+                {
+                    title: "Unity - Scripting API:",
+                    url: "https://docs.unity3d.com/ScriptReference/index.html",
+                },
+                {
+                    title: "C# Programming Guide | Microsoft Docs",
+                    url: "https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/",
+                },
+                {
+                    title: "Documentation for Visual Studio Code",
+                    url: "https://code.visualstudio.com/docs",
+                },
+                {
+                    title: "Grids and Graphs",
+                    url: "https://www.redblobgames.com/pathfinding/grids/graphs.html",
+                },
+                {
+                    title: "Component-Save-System-Manual-v1.1.pdf",
+                    url: "chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://low-scope.com/wp-content/uploads/2020/10/Component-Save-System-Manual-v1.1.pdf",
+                }],
+                "parentCategoryId": "64f5d22c4b4b66d33b8d03e3",
             },
             {
-                title: "Unity - Scripting API:",
-                url: "https://docs.unity3d.com/ScriptReference/index.html",
-                _id: "650e1cccd4428ac3fb4f1704"
-            },
-            {
-                title: "C# Programming Guide | Microsoft Docs",
-                url: "https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/",
-                _id: "650e1cccd4428ac3fb4f1705"
-            },
-            {
-                title: "Documentation for Visual Studio Code",
-                url: "https://code.visualstudio.com/docs",
-                _id: "650e1cccd4428ac3fb4f1706"
-            },
-            {
-                title: "Grids and Graphs",
-                url: "https://www.redblobgames.com/pathfinding/grids/graphs.html",
-                _id: "650e1cccd4428ac3fb4f1707"
-            },
-            {
-                title: "Component-Save-System-Manual-v1.1.pdf",
-                url: "chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://low-scope.com/wp-content/uploads/2020/10/Component-Save-System-Manual-v1.1.pdf",
-                _id: "650e1cccd4428ac3fb4f1708"
+                title: "Workspace 2",
+                sites: [],
+                "parentCategoryId": "64f5d22c4b4b66d33b8d03e3",
             }],
-            "parentCategoryId": "64f5d22c4b4b66d33b8d03e3",
-            _id: "650e1cccd4428ac3fb4f1702"
-        },
-        {
-            title: "Workspace 2",
-            sites: [],
-            "parentCategoryId": "64f5d22c4b4b66d33b8d03e3",
-            _id: "6521e4d8e6085e43c0b3fee3",
-            "__v": 0
-        }],
-        "__v": 93,
-        "userId": "6500665d739b70a010151bbc"
-    }
-]
+        };
 
+        // Mock the global fetch function
+        const originalFetch = global.fetch;
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true, // Simulate a successful response
+            json: async () => ({ data: categoryInput }), // Simulate response.json()
+        });
 
+        // Call the updateCategories function
+        const updatedCategories = await CategoryApi.updateCategories([categoryInput]);
 
-export { }
+        // Assert that fetch was called with the expected parameters
+        expect(global.fetch).toHaveBeenCalledWith(
+            "http://localhost:5000/api/category/",
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify([categoryInput]),
+            }
+        );
+
+        // Assert that the function returns the expected data
+        expect(updatedCategories).toEqual({ data: categoryInput });
+
+        // Restore the original global.fetch
+        global.fetch = originalFetch;
+    });
+
+    // Add more test cases as needed
+});
