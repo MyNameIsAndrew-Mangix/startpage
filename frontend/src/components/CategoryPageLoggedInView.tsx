@@ -244,7 +244,6 @@ function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProp
         const overCategoryIndex = categories.findIndex((cat) => cat._id === overId);
         return arrayMove(categories, activeCategoryIndex, overCategoryIndex);
       });
-      console.log(categories);
       setHasChanges(true);
     } else {
       setHasChanges(true);
@@ -284,7 +283,6 @@ function CategoryPageLoggedInView({ loggedInUser }: CategoryPageLoggedInViewProp
               });
               return updatedCategory;
             });
-            console.log(updatedCategories);
             setCategories(updatedCategories);
           }
           setOriginalParentCategoryId(null);
